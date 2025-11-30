@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego Educativo para Primaria</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Fredoka', sans-serif; }
+        body { background: linear-gradient(135deg, #E8F4F8 0%, #F5F5F5 100%); color: #333; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        header { text-align: center; margin-bottom: 30px; width: 100%; }
+        h1 { color: #64B5F6; font-size: 2.5rem; margin-bottom: 10px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
+        .subtitle { color: #FFB74D; font-size: 1.2rem; font-weight: 700; }
+        .game-container { background: linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%); border: 4px solid #E0E0E0; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); padding: 25px; width: 90%; max-width: 800px; margin-bottom: 30px; position: relative; }
+        .level-selector { display: flex; justify-content: space-around; margin-bottom: 20px; }
+        .level-btn { background: #80CBC4; color: white; border: none; border-radius: 50px; padding: 12px 25px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 6px 0 #5FA8A3, 0 8px 20px rgba(0,0,0,0.15); }
+        .level-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 0 #5FA8A3, 0 12px 25px rgba(0,0,0,0.2); }
+        .level-btn.active { background: #FFB74D; box-shadow: 0 6px 0 #F57C00, 0 8px 20px rgba(0,0,0,0.15); }
+        .level-btn:nth-child(2) { background: #90CAF9; box-shadow: 0 6px 0 #64B5F6, 0 8px 20px rgba(0,0,0,0.15); }
+        .level-btn:nth-child(2).active { background: #FFB74D; box-shadow: 0 6px 0 #F57C00, 0 8px 20px rgba(0,0,0,0.15); }
+        .level-btn:nth-child(3) { background: #EF9A9A; box-shadow: 0 6px 0 #E57373, 0 8px 20px rgba(0,0,0,0.15); }
+        .level-btn:nth-child(3).active { background: #FFB74D; box-shadow: 0 6px 0 #F57C00, 0 8px 20px rgba(0,0,0,0.15); }
+        .game-area { min-height: 400px; border: 3px dashed #c1d9ff; border-radius: 15px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; background-color: #f8f9fa; }
+        .instructions { background-color: #e6f2ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; width: 100%; }
+        .score-container { display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px; }
+        .score, .timer { background: #80CBC4; padding: 8px 15px; border-radius: 20px; font-weight: 600; color: white; box-shadow: 0 4px 0 #5FA8A3; }
+        #feedback-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px 40px; border-radius: 15px; color: white; font-size: 1.5rem; font-weight: 600; z-index: 100; text-align: center; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; pointer-events: none;}
+        #feedback-message.visible { opacity: 1; visibility: visible; }
+        .feedback-success { background: #80CBC4; box-shadow: 0 6px 0 #5FA8A3; }
+        .feedback-error { background: #EF9A9A; box-shadow: 0 6px 0 #E57373; }
+        
+        
+        #level1 .game-area { background-color: #f8f9fa; flex-direction: column; justify-content: space-around; }
+        #round-display { position: absolute; top: 15px; left: 20px; font-size: 1.2rem; color: #64B5F6; font-weight: 500; }
+        .shape-targets { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; width: 100%; margin-bottom: 40px; }
+        .shape-slot { width: 100px; height: 100px; border: 3px dashed #c1d9ff; border-radius: 15px; background-color: #f0f9ff; display: flex; justify-content: center; align-items: center; position: relative; }
+        .shape-outline { position: absolute; opacity: 0.3; pointer-events: none; }
+        .shape-outline.shape-square-outline { width: 80px; height: 80px; background-color: #ff9aa2; border-radius: 5px; }
+        .shape-outline.shape-circle-outline { width: 80px; height: 80px; background-color: #ffb347; border-radius: 50%; }
+        .shape-outline.shape-triangle-outline { width: 0; height: 0; border-left: 40px solid transparent; border-right: 40px solid transparent; border-bottom: 80px solid #8ac6d1; transform: translateY(-10px); }
+        .shape-outline.shape-rectangle-outline { width: 90px; height: 60px; background-color: #c7ceea; border-radius: 5px; }
+        .shape-outline.shape-pentagon-outline { transform: scale(0.9) translateY(-20px); }
+        .shape-source { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; width: 100%; background-color: #e6f2ff; padding: 20px; border-radius: 15px; min-height: 120px; }
+        .round-hidden { display: none !important; }
+        
+     
+        .draggable-shape { width: 80px; height: 80px; cursor: grab; transition: transform 0.2s, box-shadow 0.3s; position: relative; z-index: 10;}
+        .draggable-shape:active { cursor: grabbing; transform: scale(1.1); }
+        .shape-square { background-color: #ff9aa2; }
+        .shape-circle { background-color: #ffb347; border-radius: 50%; }
+        .shape-triangle { width: 0; height: 0; border-left: 40px solid transparent; border-right: 40px solid transparent; border-bottom: 80px solid #8ac6d1; background-color: transparent; }
+        .shape-rectangle { width: 90px; height: 60px; background-color: #c7ceea; }
+        .shape-pentagon { position: relative; width: 70px; box-sizing: content-box; border-width: 35px 25px 0; border-style: solid; border-color: #6b8cbc transparent; }
+        .shape-pentagon:before { content: ""; position: absolute; height: 0; width: 0; top: 35px; left: -25px; border-width: 0 49px 30px; border-style: solid; border-color: transparent transparent #6b8cbc; }
+        
+        
+        #level2 .game-area { background-color: #f0f9ff; display: flex; flex-direction: column; justify-content: space-between; }
+        .level2-targets { display: flex; justify-content: space-around; width: 100%; gap: 15px; }
+        .target-container-l2 { width: 48%; min-height: 150px; border: 3px dashed #a2c4e0; border-radius: 15px; padding: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; }
+        .target-container-l2 h2 { width: 100%; text-align: center; font-size: 1.2rem; color: #64B5F6; margin-bottom: 10px; }
+        .shape-source-l2 { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 15px; width: 100%; min-height: 120px; background-color: #e6f2ff; padding: 15px; border-radius: 15px; margin-top: 20px; }
+        .shape-sphere { background: radial-gradient(circle at 30% 30%, #ffd166, #ff8c42); border-radius: 50%; }
+        .shape-cube { width: 60px; height: 60px; background-color: #8ac6d1; }
+        .shape-cube:before { content: ''; position: absolute; top: -20px; left: 10px; width: 60px; height: 20px; background-color: #a2d6e0; transform: skewX(-45deg); }
+        .shape-cube:after { content: ''; position: absolute; top: -10px; left: 70px; width: 20px; height: 60px; background-color: #6ba8b5; transform: skewY(-45deg); }
+        .shape-pyramid { width: 0; height: 0; border-left: 40px solid transparent; border-right: 40px solid transparent; border-bottom: 70px solid #ff9aa2; }
+        .shape-pyramid:after { content: ''; position: absolute; top: 8px; left: -38px; width: 2px; height: 62px; background: rgba(0,0,0,0.2); transform: rotate(15deg); }
+        .hint-highlight { box-shadow: 0 0 15px 5px #FFB74D; border-radius: 10px; }
+
+       
+        #level3 .game-area { background-color: #f8f9fa; }
+        .math-problem { background-color: #e6f2ff; padding: 20px; border-radius: 15px; margin-bottom: 20px; text-align: center; width: 100%; position: relative; }
+        #problem-display { position: absolute; top: 15px; left: 20px; font-size: 1.2rem; color: #64B5F6; font-weight: 500; }
+        .math-problem h3 { color: #64B5F6; margin-bottom: 15px; padding-top: 20px; }
+        .shape-display { width: 150px; height: 150px; margin: 0 auto 20px; background: #80CBC4; border: 3px solid #5FA8A3; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: bold; color: white; border-radius: 10px; }
+        .answer-options { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 20px; }
+        .answer-btn { background: #90CAF9; color: white; border: none; border-radius: 60px; padding: 12px 20px; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 6px 0 #64B5F6; }
+        .answer-btn:hover { background: #90CAF9; transform: translateY(-2px); box-shadow: 0 8px 0 #64B5F6; }
+        .answer-btn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; transform: none; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+        .control-btn { background: #80CBC4; color: white; border: none; border-radius: 60px; padding: 10px 20px; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 6px 0 #5FA8A3; }
+        .control-btn:hover { background: #80CBC4; box-shadow: 0 8px 0 #5FA8A3; }
+        .control-btn:disabled { background: #ddd; box-shadow: none; cursor: not-allowed; }
+        .hint-btn { background: #FFB74D; box-shadow: 0 6px 0 #F57C00; }
+        .hint-btn:hover { background: #FFB74D; box-shadow: 0 8px 0 #F57C00; }
+        .hidden { display: none; }
+        @media (max-width: 600px) { .level-selector { flex-direction: column; gap: 10px; } .level-btn { width: 100%; } .game-area { min-height: 300px; } }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Juegos Matemáticos</h1>
+        <p class="subtitle">Aprende matemáticas de forma divertida</p>
+    </header>
+    <div class="game-container">
+        <div id="feedback-message"></div>
+
+        <div class="level-selector">
+            <button class="level-btn active" data-level="1">Nivel 1: Clasifica Figuras</button>
+            <button class="level-btn" data-level="2">Nivel 2: 2D vs 3D</button>
+            <button class="level-btn" data-level="3">Nivel 3: Conversiones</button>
+        </div>
+        <div class="score-container">
+            <div class="score">Puntos: <span id="score-value">0</span></div>
+            <div class="timer">Tiempo: <span id="timer-value">60</span>s</div>
+        </div>
+        <div class="instructions" id="instructions">
+            <p>¡Bienvenido! Presiona <strong>Comenzar Juego</strong> para empezar.</p>
+        </div>
+        
+        <div id="level1" class="game-level">
+            <div class="game-area">
+                <h3 id="round-display">Ronda <span id="round-number">1</span> de 2</h3>
+                <div class="shape-targets">
+                    <div class="shape-slot drop-target round-1" data-shape="square"><div class="shape-outline shape-square-outline"></div></div>
+                    <div class="shape-slot drop-target round-1" data-shape="circle"><div class="shape-outline shape-circle-outline"></div></div>
+                    <div class="shape-slot drop-target round-1" data-shape="triangle"><div class="shape-outline shape-triangle-outline"></div></div>
+                    <div class="shape-slot drop-target round-2 round-hidden" data-shape="rectangle"><div class="shape-outline shape-rectangle-outline"></div></div>
+                    <div class="shape-slot drop-target round-2 round-hidden" data-shape="pentagon"><div class="shape-outline shape-pentagon shape-pentagon-outline"></div></div>
+                </div>
+                <div class="shape-source" id="source-level1">
+                    <div id="drag-l1-square" class="draggable-shape shape-square round-1" data-shape="square" draggable="true"></div>
+                    <div id="drag-l1-circle" class="draggable-shape shape-circle round-1" data-shape="circle" draggable="true"></div>
+                    <div id="drag-l1-triangle" class="draggable-shape shape-triangle round-1" data-shape="triangle" draggable="true"></div>
+                    <div id="drag-l1-rectangle" class="draggable-shape shape-rectangle round-2 round-hidden" data-shape="rectangle" draggable="true"></div>
+                    <div id="drag-l1-pentagon" class="draggable-shape shape-pentagon round-2 round-hidden" data-shape="pentagon" draggable="true"></div>
+                </div>
+            </div>
+            <div class="controls" id="controls-level1">
+                <button class="control-btn" id="start-level1">Comenzar Juego</button>
+                <button class="control-btn" id="reset-level1">Reiniciar</button>
+            </div>
+        </div>
+        
+        <div id="level2" class="game-level hidden">
+            <div class="game-area">
+                <div class="level2-targets">
+                    <div class="target-container-l2 drop-target" data-category="2d"><h2>Figuras Planas (2D)</h2></div>
+                    <div class="target-container-l2 drop-target" data-category="3d"><h2>Cuerpos Geométricos (3D)</h2></div>
+                </div>
+                <div class="shape-source-l2" id="source-level2">
+                    <div id="drag-l2-circle" class="draggable-shape shape-circle" data-category="2d" draggable="true"></div>
+                    <div id="drag-l2-triangle" class="draggable-shape shape-triangle" data-category="2d" draggable="true"></div>
+                    <div id="drag-l2-pentagon" class="draggable-shape shape-pentagon" data-category="2d" draggable="true"></div>
+                    <div id="drag-l2-sphere" class="draggable-shape shape-sphere" data-category="3d" draggable="true"></div>
+                    <div id="drag-l2-cube" class="draggable-shape shape-cube" data-category="3d" draggable="true"></div>
+                    <div id="drag-l2-pyramid" class="draggable-shape shape-pyramid" data-category="3d" draggable="true"></div>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="control-btn" id="start-level2">Comenzar Juego</button>
+                <button class="control-btn" id="reset-level2">Reiniciar</button>
+                <button class="control-btn hint-btn" id="hint-level2">💡 Pista (-10 Pts)</button>
+                <button class="control-btn" id="go-to-level3-btn">Ir al Nivel 3</button>
+            </div>
+        </div>
+
+        <div id="level3" class="game-level hidden">
+            <div class="game-area">
+                <div class="math-problem">
+                    <h3 id="problem-display">Problema <span id="problem-count">1</span></h3>
+                    <h3>Problema de Conversión</h3>
+                    <p id="problem-text">Presiona comenzar para ver el problema</p>
+                </div>
+                <div class="answer-options" id="level3-options">
+                    <button class="answer-btn">?</button>
+                    <button class="answer-btn">?</button>
+                    <button class="answer-btn">?</button>
+                    <button class="answer-btn">?</button>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="control-btn" id="start-level3">Comenzar Juego</button>
+                <button class="control-btn hint-btn" id="hint-level3">💡 Pista (-10 Pts)</button>
+                <button class="control-btn" id="go-to-level1-btn">Volver al Inicio</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- VARIABLES GLOBALES ---
+        let score = 0;
+        let timeLeft = 60;
+        let timerInterval;
+        let isGameActive = false;
+        let currentLevel = 1;
+        let level1Round = 1;
+        
+        // Variables específicas para Nivel 3 (Conversiones)
+        let currentCorrectAnswerL3 = ""; 
+        let availableProblems = []; // Aquí guardaremos las preguntas mezcladas
+        let problemsSolvedInLevel3 = 0;
+        const totalProblemsToWinL3 = 5; // Número de preguntas para ganar el nivel
+        
+        // Elementos DOM
+        const scoreElement = document.getElementById('score-value');
+        const timerElement = document.getElementById('timer-value');
+        const feedbackElement = document.getElementById('feedback-message');
+        const instructions = document.getElementById('instructions');
+        
+        // --- BASE DE DATOS DE PREGUNTAS (NIVEL 3) ---
+        const allMathProblems = [
+            { q: "1 Metro = ___ Centímetros", options: ["10", "100", "1000", "50"], ans: "100" },
+            { q: "1 Kilogramo = ___ Gramos", options: ["100", "500", "1000", "10"], ans: "1000" },
+            { q: "Media hora = ___ Minutos", options: ["30", "60", "15", "45"], ans: "30" },
+            { q: "1 Litro = ___ Mililitros", options: ["100", "10", "1000", "500"], ans: "1000" },
+            { q: "1 Minuto = ___ Segundos", options: ["100", "60", "30", "10"], ans: "60" },
+            { q: "1 Kilómetro = ___ Metros", options: ["100", "1000", "500", "10"], ans: "1000" },
+            { q: "Un cuarto de hora = ___ Min.", options: ["15", "25", "30", "45"], ans: "15" },
+            { q: "1000 Mililitros = ___ Litro(s)", options: ["1", "10", "100", "0.1"], ans: "1" },
+            { q: "1 Día = ___ Horas", options: ["12", "20", "24", "48"], ans: "24" },
+            { q: "500 Centímetros = ___ Metros", options: ["5", "50", "0.5", "5000"], ans: "5" },
+            { q: "Media tonelada = ___ Kg", options: ["100", "500", "1000", "50"], ans: "500" },
+            { q: "2 Horas = ___ Minutos", options: ["100", "120", "60", "200"], ans: "120" }
+        ];
+
+        // --- NAVEGACIÓN DE NIVELES ---
+        const levelBtns = document.querySelectorAll('.level-btn');
+        const levels = document.querySelectorAll('.game-level');
+
+        levelBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                resetGame();
+                levelBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const targetLevel = btn.getAttribute('data-level');
+                currentLevel = parseInt(targetLevel);
+                
+                levels.forEach(l => l.classList.add('hidden'));
+                document.getElementById(`level${targetLevel}`).classList.remove('hidden');
+                
+                updateInstructions();
+            });
+        });
+
+        function updateInstructions() {
+            if(currentLevel === 1) instructions.innerHTML = "<p>Arrastra las figuras a su silueta correcta.</p>";
+            if(currentLevel === 2) instructions.innerHTML = "<p>Clasifica: ¿Es plana (2D) o cuerpo (3D)?</p>";
+            if(currentLevel === 3) instructions.innerHTML = "<p>Resuelve 5 conversiones sin equivocarte.</p>";
+        }
+
+        // --- FUNCIONES DEL JUEGO ---
+        function updateScore(points) {
+            score += points;
+            scoreElement.textContent = score;
+        }
+
+        function showFeedback(msg, type) {
+            feedbackElement.textContent = msg;
+            feedbackElement.className = ''; 
+            feedbackElement.classList.add(type === 'success' ? 'feedback-success' : 'feedback-error');
+            feedbackElement.classList.add('visible');
+            setTimeout(() => { feedbackElement.classList.remove('visible'); }, 1500);
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 60;
+            timerElement.textContent = timeLeft;
+            timerInterval = setInterval(() => {
+                if(timeLeft > 0) {
+                    timeLeft--;
+                    timerElement.textContent = timeLeft;
+                } else {
+                    endGame("¡Tiempo agotado!");
+                }
+            }, 1000);
+        }
+
+        function stopTimer() { clearInterval(timerInterval); }
+
+        function endGame(msg) {
+            stopTimer();
+            isGameActive = false;
+            showFeedback(msg, 'error');
+            document.querySelectorAll('.draggable-shape').forEach(el => el.setAttribute('draggable', 'false'));
+            disableLevel3Buttons();
+        }
+
+        function resetGame() {
+            stopTimer();
+            isGameActive = false;
+            score = 0;
+            scoreElement.textContent = '0';
+            timeLeft = 60;
+            timerElement.textContent = '60';
+            resetLevel1();
+            resetLevel2();
+            resetLevel3();
+        }
+
+        // --- CONTROLADORES DE BOTONES ---
+        document.getElementById('start-level1').addEventListener('click', () => startGame(1));
+        document.getElementById('reset-level1').addEventListener('click', resetGame);
+        document.getElementById('start-level2').addEventListener('click', () => startGame(2));
+        document.getElementById('reset-level2').addEventListener('click', resetGame);
+        document.getElementById('start-level3').addEventListener('click', () => startGame(3));
+        
+        // Botones de navegación interna
+        document.getElementById('go-to-level1-btn').addEventListener('click', () => levelBtns[0].click());
+        document.getElementById('go-to-level3-btn').addEventListener('click', () => levelBtns[2].click());
+
+        function startGame(level) {
+            if(isGameActive) return;
+            resetGame(); // Limpia estado anterior
+            isGameActive = true;
+            startTimer();
+            showFeedback("¡A jugar!", "success");
+
+            if (level === 1) {
+                document.querySelectorAll('#level1 .draggable-shape').forEach(el => {
+                    if(!el.classList.contains('round-hidden')) el.setAttribute('draggable', 'true');
+                });
+            } else if (level === 2) {
+                document.querySelectorAll('#level2 .draggable-shape').forEach(el => el.setAttribute('draggable', 'true'));
+            } else if (level === 3) {
+                // Preparar la "bolsa" de preguntas mezcladas
+                availableProblems = [...allMathProblems].sort(() => Math.random() - 0.5);
+                problemsSolvedInLevel3 = 0;
+                document.getElementById('problem-count').textContent = "1";
+                generateMathProblem();
+            }
+        }
+
+        // --- LÓGICA NIVEL 1 (Siluetas) ---
+        function resetLevel1() {
+            level1Round = 1;
+            document.getElementById('round-number').textContent = "1";
+            const source = document.getElementById('source-level1');
+            const draggables = document.querySelectorAll('#level1 .draggable-shape');
+            
+            draggables.forEach(d => {
+                source.appendChild(d);
+                d.style.opacity = "1";
+                d.setAttribute('draggable', 'false');
+                if(d.classList.contains('round-1')) d.classList.remove('round-hidden');
+                else d.classList.add('round-hidden');
+            });
+            document.querySelectorAll('.shape-slot').forEach(slot => {
+                if(slot.classList.contains('round-1')) slot.classList.remove('round-hidden');
+                else slot.classList.add('round-hidden');
+            });
+        }
+
+        // --- LÓGICA NIVEL 2 (2D vs 3D) ---
+        function resetLevel2() {
+            const source = document.getElementById('source-level2');
+            const draggables = document.querySelectorAll('#level2 .draggable-shape');
+            draggables.forEach(d => {
+                source.appendChild(d);
+                d.setAttribute('draggable', 'false');
+                d.style.display = "block";
+                d.classList.remove('hint-highlight');
+            });
+            document.querySelectorAll('.target-container-l2').forEach(t => t.classList.remove('hint-highlight'));
+        }
+
+        // --- DRAG & DROP COMÚN ---
+        const draggables = document.querySelectorAll('.draggable-shape');
+        const dropTargets = document.querySelectorAll('.drop-target');
+
+        draggables.forEach(draggable => {
+            draggable.addEventListener('dragstart', (e) => {
+                if(!isGameActive) { e.preventDefault(); return; }
+                e.dataTransfer.setData('text/plain', e.target.id);
+                e.target.style.opacity = '0.5';
+            });
+            draggable.addEventListener('dragend', (e) => { e.target.style.opacity = '1'; });
+        });
+
+        dropTargets.forEach(target => {
+            target.addEventListener('dragover', (e) => {
+                if(!isGameActive) return;
+                e.preventDefault();
+                target.style.background = '#e1f5fe';
+            });
+            target.addEventListener('dragleave', (e) => { target.style.background = ''; });
+            target.addEventListener('drop', (e) => {
+                e.preventDefault();
+                target.style.background = '';
+                if(!isGameActive) return;
+
+                const id = e.dataTransfer.getData('text/plain');
+                const draggable = document.getElementById(id);
+                if(!draggable) return;
+
+                let isCorrect = false;
+                if (currentLevel === 1) {
+                    if (target.getAttribute('data-shape') === draggable.getAttribute('data-shape')) isCorrect = true;
+                } else if (currentLevel === 2) {
+                    if (target.getAttribute('data-category') === draggable.getAttribute('data-category')) isCorrect = true;
+                }
+
+                if (isCorrect) {
+                    target.appendChild(draggable);
+                    draggable.setAttribute('draggable', 'false');
+                    draggable.style.cursor = 'default';
+                    updateScore(20);
+                    showFeedback("¡Correcto!", "success");
+                    checkLevelCompletion();
+                } else {
+                    updateScore(-5);
+                    showFeedback("Intenta de nuevo", "error");
+                }
+            });
+        });
+
+        function checkLevelCompletion() {
+            if(currentLevel === 1) {
+                const source = document.getElementById('source-level1');
+                if(source.children.length === 2 && level1Round === 1) {
+                    setTimeout(() => {
+                        level1Round = 2;
+                        document.getElementById('round-number').textContent = "2";
+                        showFeedback("¡Ronda 2!", "success");
+                        document.querySelectorAll('.round-1').forEach(el => el.classList.add('round-hidden'));
+                        document.querySelectorAll('.round-2').forEach(el => {
+                            el.classList.remove('round-hidden');
+                            if(el.classList.contains('draggable-shape')) el.setAttribute('draggable', 'true');
+                        });
+                    }, 1000);
+                } else if (source.children.length === 0) {
+                    stopTimer();
+                    showFeedback(`¡Nivel 1 Completado!`, "success");
+                }
+            } else if (currentLevel === 2) {
+                const source = document.getElementById('source-level2');
+                if(source.children.length === 0) {
+                    stopTimer();
+                    showFeedback(`¡Nivel 2 Completado!`, "success");
+                }
+            }
+        }
+
+        // --- LÓGICA NIVEL 3 (CONVERSIONES) MEJORADA ---
+        
+        function resetLevel3() {
+             document.getElementById('problem-text').textContent = "Presiona comenzar";
+             document.getElementById('problem-count').textContent = "1";
+             disableLevel3Buttons();
+        }
+
+        function disableLevel3Buttons() {
+             const btns = document.querySelectorAll('#level3-options .answer-btn');
+             btns.forEach(b => {
+                 b.textContent = "?";
+                 b.disabled = true;
+                 b.onclick = null;
+                 b.classList.remove('hint-highlight');
+             });
+        }
+
+        function generateMathProblem() {
+            // Verificar si ganamos o se acabaron las preguntas
+            if (problemsSolvedInLevel3 >= totalProblemsToWinL3 || availableProblems.length === 0) {
+                stopTimer();
+                showFeedback(`¡Nivel 3 Completado! Puntos: ${score}`, "success");
+                document.getElementById('problem-text').textContent = "¡Felicidades! Nivel completado.";
+                disableLevel3Buttons();
+                return;
+            }
+
+            // Actualizar contador visual
+            document.getElementById('problem-count').textContent = problemsSolvedInLevel3 + 1;
+
+            // Sacar una pregunta de la "bolsa" (no se repetirá porque la sacamos del array)
+            const problem = availableProblems.pop();
+            
+            document.getElementById('problem-text').textContent = problem.q;
+            currentCorrectAnswerL3 = problem.ans;
+            
+            const btnContainer = document.getElementById('level3-options');
+            const btns = btnContainer.querySelectorAll('.answer-btn');
+            
+            // Mezclar las opciones de respuesta
+            let opts = [...problem.options].sort(() => Math.random() - 0.5);
+            
+            btns.forEach((btn, index) => {
+                btn.textContent = opts[index];
+                btn.disabled = false;
+                btn.classList.remove('hint-highlight');
+                
+                btn.onclick = () => {
+                    if(!isGameActive) return;
+                    
+                    if(btn.textContent === problem.ans) {
+                        updateScore(20);
+                        showFeedback("¡Correcto! +20", "success");
+                        problemsSolvedInLevel3++;
+                        // Esperar un poco antes de la siguiente pregunta
+                        setTimeout(generateMathProblem, 1000);
+                    } else {
+                        updateScore(-10);
+                        showFeedback("Incorrecto", "error");
+                    }
+                };
+            });
+        }
+
+        // --- SISTEMA DE PISTAS (HINTS) ---
+
+        // Pista Nivel 2
+        document.getElementById('hint-level2').addEventListener('click', () => {
+            if(!isGameActive) { showFeedback("¡Inicia el juego!", "error"); return; }
+            
+            updateScore(-10);
+            showFeedback("Pista (-10 pts)", "success");
+
+            const item = document.querySelector('#source-level2 .draggable-shape');
+            if(item) {
+                const cat = item.getAttribute('data-category');
+                const target = document.querySelector(`.target-container-l2[data-category="${cat}"]`);
+                target.classList.add('hint-highlight');
+                item.classList.add('hint-highlight');
+                setTimeout(() => {
+                    target.classList.remove('hint-highlight');
+                    item.classList.remove('hint-highlight');
+                }, 2000);
+            }
+        });
+
+        // Pista Nivel 3
+        document.getElementById('hint-level3').addEventListener('click', () => {
+            if(!isGameActive) { showFeedback("¡Inicia el juego!", "error"); return; }
+
+            updateScore(-10);
+            showFeedback("Pista (-10 pts)", "success");
+
+            const btns = document.querySelectorAll('#level3-options .answer-btn');
+            btns.forEach(btn => {
+                if(btn.textContent === currentCorrectAnswerL3) {
+                    btn.classList.add('hint-highlight');
+                    setTimeout(() => btn.classList.remove('hint-highlight'), 2000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

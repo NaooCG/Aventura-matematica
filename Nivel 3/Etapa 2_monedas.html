@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Monedas para Niños</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #E8F4F8 0%, #F5F5F5 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%);
+            border: 4px solid #E0E0E0;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: #64B5F6;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: #FFB74D;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+            background: #FFB74D;
+            padding: 15px 25px;
+            border-radius: 60px;
+            border: 3px solid #F57C00;
+            color: white;
+            font-weight: 700;
+        }
+
+        .game-area {
+            display: flex;
+            justify-content: space-between;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .bill-container, .coins-container {
+            flex: 1;
+            background: #E6F2FF;
+            border-radius: 20px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 320px;
+            border: 3px solid #90CAF9;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #64B5F6;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .bill {
+            width: 220px;
+            height: 110px;
+            background: linear-gradient(135deg, #80CBC4, #5FA8A3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 6px 0 #5FA8A3;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid #FFB74D;
+        }
+
+        .bill::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.1) 10px,
+                rgba(255, 255, 255, 0.1) 20px
+            );
+        }
+
+        .coins-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .coin {
+            background: radial-gradient(circle at 30% 30%, #FFB74D, #F57C00);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #F57C00;
+            transition: all 0.2s;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #FFD54F;
+        }
+
+        .coin.small {
+            width: 85px;
+            height: 85px;
+        }
+
+        .coin.large {
+            width: 115px;
+            height: 115px;
+        }
+
+        .coin::before {
+            content: "";
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            right: 10%;
+            bottom: 10%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+        }
+
+        .coin.selected {
+            transform: scale(1.15);
+            box-shadow: 0 0 20px #FFB74D;
+            border: 3px solid #64B5F6;
+        }
+
+        .coin-value {
+            color: white;
+            z-index: 1;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .selected-coins {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            background: #FFF9E6;
+            padding: 15px;
+            border-radius: 60px;
+            width: 100%;
+            border: 3px solid #FFB74D;
+        }
+
+        .selected-list {
+            margin-top: 10px;
+            font-size: 1rem;
+            min-height: 20px;
+            color: #5FA8A3;
+            font-weight: 600;
+        }
+
+        .total-display {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #64B5F6;
+        }
+
+        .combinations-info {
+            margin-top: 15px;
+            font-size: 1rem;
+            color: #64B5F6;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 14px 28px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+        }
+
+        #check-btn {
+            background: #80CBC4;
+            color: white;
+            box-shadow: 0 6px 0 #5FA8A3;
+        }
+
+        #next-btn {
+            background: #90CAF9;
+            color: white;
+            box-shadow: 0 6px 0 #64B5F6;
+        }
+
+        #restart-btn {
+            background: #FFB74D;
+            color: white;
+            box-shadow: 0 6px 0 #F57C00;
+        }
+
+        #clear-btn {
+            background: #EF9A9A;
+            color: white;
+            box-shadow: 0 6px 0 #E57373;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+        }
+
+        button:active {
+            transform: translateY(2px);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.4rem;
+            min-height: 40px;
+            font-weight: 600;
+            padding: 15px;
+            border-radius: 60px;
+        }
+
+        .success {
+            color: #5FA8A3;
+            background-color: #E8F5E9;
+            border: 3px solid #80CBC4;
+        }
+
+        .error {
+            color: #E57373;
+            background-color: #FFEBEE;
+            border: 3px solid #EF9A9A;
+        }
+
+        .instructions {
+            margin-top: 30px;
+            background: #E6F2FF;
+            padding: 25px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            border: 3px solid #90CAF9;
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #64B5F6;
+            font-size: 1.4rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .instructions p {
+            margin-bottom: 10px;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+
+        .instructions-list {
+            padding-left: 25px;
+            margin-top: 15px;
+        }
+
+        .instructions-list li {
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .coins-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Juego de Monedas</h1>
+            <div class="subtitle">¡Encuentra las monedas correctas para completar el billete!</div>
+        </header>
+        
+        <div class="game-info">
+            <div>Ronda: <span id="round">1</span> de 4</div>
+            <div>Puntos: <span id="score">100</span></div>
+        </div>
+        
+        <div class="game-area">
+            <div class="bill-container">
+                <div class="section-title">Tu Billete</div>
+                <div class="bill" id="bill-value">$20</div>
+                <div class="combinations-info" id="combinations-info">
+                    ¡Haz clic en las monedas para acumular!
+                </div>
+            </div>
+            
+            <div class="coins-container">
+                <div class="section-title">Elige tus Monedas</div>
+                <div class="coins-grid" id="coins-grid">
+                    <!-- Las monedas se generarán con JavaScript -->
+                </div>
+                <div class="selected-coins">
+                    <div>Total elegido: <span class="total-display">$<span id="total-selected">0</span></span></div>
+                    <div class="selected-list" id="selected-list">Monedas: Ninguna</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="message" id="message">¡Selecciona monedas que sumen el valor del billete!</div>
+        
+        <div class="controls">
+            <button id="check-btn">Verificar</button>
+            <button id="clear-btn">Limpiar</button>
+            <button id="next-btn" disabled>Siguiente</button>
+            <button id="restart-btn">Reiniciar</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>¿Cómo Jugar?</h3>
+            <p>Tu objetivo es seleccionar monedas que sumen exactamente el valor del billete.</p>
+            <ul class="instructions-list">
+                <li>Haz clic en las monedas para acumular su valor (puedes hacer clic varias veces)</li>
+                <li>Si aciertas, ganas 25 puntos</li>
+                <li>Si te equivocas, pierdes 25 puntos</li>
+                <li>Usa "Limpiar" para empezar de nuevo tu selección</li>
+                <li>Completa las 4 rondas para ganar el juego</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Valores de monedas mexicanas (solo 1, 2, 5 y 10 pesos)
+        const coinValues = [100, 200, 500, 1000]; // 1, 2, 5, 10 pesos (en centavos)
+        const billValues = [2000, 5000, 10000, 20000]; // 20, 50, 100, 200 pesos (en centavos)
+        
+        // Estado del juego
+        let currentRound = 1;
+        let score = 100;
+        let currentBillValue = 0;
+        let selectedCoins = [];
+        let totalSelectedValue = 0;
+        let possibleSolutions = [];
+        
+        // Elementos del DOM
+        const roundElement = document.getElementById('round');
+        const scoreElement = document.getElementById('score');
+        const billValueElement = document.getElementById('bill-value');
+        const coinsGrid = document.getElementById('coins-grid');
+        const messageElement = document.getElementById('message');
+        const totalSelectedElement = document.getElementById('total-selected');
+        const selectedListElement = document.getElementById('selected-list');
+        const combinationsInfo = document.getElementById('combinations-info');
+        const checkButton = document.getElementById('check-btn');
+        const nextButton = document.getElementById('next-btn');
+        const restartButton = document.getElementById('restart-btn');
+        const clearButton = document.getElementById('clear-btn');
+        
+        // Inicializar el juego
+        function initGame() {
+            currentRound = 1;
+            score = 100;
+            selectedCoins = [];
+            totalSelectedValue = 0;
+            
+            updateUI();
+            generateRound();
+        }
+        
+        // Generar una nueva ronda
+        function generateRound() {
+            // Limpiar selección
+            selectedCoins = [];
+            totalSelectedValue = 0;
+            
+            // Seleccionar un billete aleatorio
+            currentBillValue = billValues[Math.floor(Math.random() * billValues.length)];
+            billValueElement.textContent = `$${formatMoney(currentBillValue / 100)}`;
+            
+            // Generar todas las soluciones posibles
+            possibleSolutions = findAllSolutions(currentBillValue, coinValues);
+            combinationsInfo.textContent = `¡Haz clic en las monedas para acumular!`;
+            
+            // Generar monedas para mostrar
+            coinsGrid.innerHTML = '';
+            const coinsToShow = generateCoinSet();
+            
+            // Crear elementos de monedas
+            coinsToShow.forEach(value => {
+                const coinElement = document.createElement('div');
+                let coinClass = 'coin';
+                
+                // Asignar diferentes tamaños según el valor
+                if (value === 100) coinClass += ' small'; // $1
+                if (value === 1000) coinClass += ' large'; // $10
+                
+                coinElement.className = coinClass;
+                coinElement.innerHTML = `<span class="coin-value">$${formatMoney(value / 100)}</span>`;
+                coinElement.dataset.value = value;
+                
+                coinElement.addEventListener('click', () => {
+                    toggleCoinSelection(coinElement, value);
+                });
+                
+                coinsGrid.appendChild(coinElement);
+            });
+            
+            // Actualizar UI
+            updateSelectedDisplay();
+            messageElement.textContent = '¡Selecciona monedas que sumen el valor del billete!';
+            messageElement.className = 'message';
+            nextButton.disabled = true;
+            checkButton.disabled = false;
+            clearButton.disabled = false;
+        }
+        
+        // Generar un conjunto de monedas (una de cada denominación)
+        function generateCoinSet() {
+            // Solo mostrar cada denominación una vez
+            return [100, 200, 500, 1000]; // $1, $2, $5, $10
+        }
+        
+        // Encontrar todas las soluciones posibles
+        function findAllSolutions(target, coins) {
+            const results = [];
+            
+            function findCombinations(remaining, currentCombination, startIndex) {
+                if (remaining === 0) {
+                    results.push([...currentCombination]);
+                    return;
+                }
+                
+                if (remaining < 0) return;
+                
+                for (let i = startIndex; i < coins.length; i++) {
+                    if (coins[i] <= remaining) {
+                        currentCombination.push(coins[i]);
+                        findCombinations(remaining - coins[i], currentCombination, i);
+                        currentCombination.pop();
+                    }
+                }
+            }
+            
+            // Ordenar monedas de mayor a menor para eficiencia
+            const sortedCoins = [...coins].sort((a, b) => b - a);
+            findCombinations(target, [], 0);
+            
+            return results;
+        }
+        
+        // Alternar selección de moneda (ahora solo acumula)
+        function toggleCoinSelection(coinElement, value) {
+            // Siempre agregar la moneda (acumular)
+            selectedCoins.push(value);
+            
+            // Efecto visual temporal
+            coinElement.style.transform = 'scale(1.3)';
+            coinElement.style.boxShadow = '0 0 25px #FFB74D';
+            
+            setTimeout(() => {
+                coinElement.style.transform = '';
+                coinElement.style.boxShadow = '';
+            }, 200);
+            
+            // Calcular el total seleccionado
+            totalSelectedValue = selectedCoins.reduce((sum, coin) => sum + coin, 0);
+            
+            // Actualizar display
+            updateSelectedDisplay();
+        }
+        
+        // Actualizar el display de monedas seleccionadas
+        function updateSelectedDisplay() {
+            totalSelectedElement.textContent = formatMoney(totalSelectedValue / 100);
+            
+            if (selectedCoins.length === 0) {
+                selectedListElement.textContent = 'Monedas: Ninguna';
+            } else {
+                const coinsText = selectedCoins.map(coin => `$${formatMoney(coin / 100)}`).join(', ');
+                selectedListElement.textContent = `Monedas: ${coinsText}`;
+            }
+        }
+        
+        // Limpiar selección
+        function clearSelection() {
+            selectedCoins = [];
+            totalSelectedValue = 0;
+            updateSelectedDisplay();
+            messageElement.textContent = '¡Selección limpiada! Intenta de nuevo.';
+            messageElement.className = 'message';
+        }
+        
+        // Formatear dinero para mostrar correctamente los decimales
+        function formatMoney(amount) {
+            return amount.toFixed(0); // Solo números enteros para pesos
+        }
+        
+        // Verificar la selección
+        function checkSelection() {
+            if (totalSelectedValue === currentBillValue) {
+                // Correcto
+                score += 25;
+                messageElement.textContent = '¡Excelente! Encontraste la combinación correcta.';
+                messageElement.className = 'message success';
+                nextButton.disabled = false;
+                checkButton.disabled = true;
+                clearButton.disabled = true;
+                
+                // Deshabilitar todas las monedas
+                const allCoins = coinsGrid.querySelectorAll('.coin');
+                allCoins.forEach(coin => {
+                    coin.style.pointerEvents = 'none';
+                });
+            } else {
+                // Incorrecto
+                score = Math.max(0, score - 25);
+                messageElement.textContent = `No es correcto. Tienes $${formatMoney(totalSelectedValue / 100)}, pero necesitas $${formatMoney(currentBillValue / 100)}. Sigue intentando.`;
+                messageElement.className = 'message error';
+                
+                // Permitir seguir intentando
+                checkButton.disabled = false;
+            }
+            
+            updateUI();
+        }
+        
+        // Pasar a la siguiente ronda
+        function nextRound() {
+            currentRound++;
+            
+            if (currentRound > 4) {
+                // Juego terminado
+                let finalMessage = `¡Completaste todas las rondas! Tu puntuación final es ${score}. `;
+                if (score >= 150) {
+                    finalMessage += "¡Eres un experto en monedas!";
+                } else if (score >= 100) {
+                    finalMessage += "¡Muy buen trabajo!";
+                } else {
+                    finalMessage += "¡Sigue practicando, lo harás mejor la próxima vez!";
+                }
+                messageElement.textContent = finalMessage;
+                messageElement.className = 'message success';
+                nextButton.disabled = true;
+                checkButton.disabled = true;
+                clearButton.disabled = true;
+            } else {
+                generateRound();
+            }
+            
+            updateUI();
+        }
+        
+        // Actualizar la interfaz de usuario
+        function updateUI() {
+            roundElement.textContent = currentRound;
+            scoreElement.textContent = score;
+        }
+        
+        // Event listeners
+        checkButton.addEventListener('click', checkSelection);
+        nextButton.addEventListener('click', nextRound);
+        restartButton.addEventListener('click', initGame);
+        clearButton.addEventListener('click', clearSelection);
+        
+        // Iniciar el juego
+        initGame();
+    </script>
+</body>
+</html>

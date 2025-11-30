@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprende la Hora - Juego para Niños</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #E8F4F8 0%, #F5F5F5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-wrapper {
+            width: 100%;
+            max-width: 900px;
+            background: linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%);
+            border: 4px solid #E0E0E0;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #64B5F6;
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #FFB74D;
+            font-weight: 700;
+        }
+
+        .instructions {
+            background: rgba(255, 183, 77, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            max-width: 600px;
+            text-align: center;
+            font-size: 1.1rem;
+            border: 2px solid #FFB74D;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+            background: rgba(100, 181, 246, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .info-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 1rem;
+            opacity: 0.9;
+            color: #64B5F6;
+        }
+
+        .info-value {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-top: 5px;
+            color: #64B5F6;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .target-time-container {
+            background: rgba(128, 203, 196, 0.1);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            border: 2px solid #80CBC4;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .target-label {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #64B5F6;
+            font-weight: 700;
+        }
+
+        .target-time {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 10px 30px;
+            border-radius: 50px;
+            display: inline-block;
+            color: #64B5F6;
+            border: 2px solid #64B5F6;
+        }
+
+        .clocks-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .clock {
+            background-color: white;
+            border-radius: 50%;
+            width: 170px;
+            height: 170px;
+            position: relative;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            justify-self: center;
+            border: 5px solid #90CAF9;
+        }
+
+        .clock:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .clock-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: #f8f8f8;
+        }
+
+        .hour-hand, .minute-hand {
+            position: absolute;
+            transform-origin: bottom center;
+            left: 50%;
+            bottom: 50%;
+            transform: translateX(-50%);
+            border-radius: 4px;
+            z-index: 5;
+        }
+
+        .hour-hand {
+            width: 6px;
+            height: 45px;
+            background-color: #FF6B6B;
+            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .minute-hand {
+            width: 4px;
+            height: 60px;
+            background-color: #4ECDC4;
+            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .center-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: #333;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .numbers {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .number {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transform-origin: center;
+        }
+
+        .number span {
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            width: 26px;
+            height: 26px;
+            line-height: 26px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 2px solid #90CAF9;
+        }
+
+        .minute-marks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .minute-mark {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-origin: center;
+        }
+
+        .minute-mark::before {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 6px;
+            background-color: #999;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .hour-mark::before {
+            height: 10px;
+            background-color: #333;
+            width: 3px;
+        }
+
+        .feedback {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            min-height: 40px;
+            text-align: center;
+            transition: all 0.3s;
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid #E0E0E0;
+        }
+
+        .correct {
+            color: #5FA8A3;
+            background: rgba(128, 203, 196, 0.2);
+            border: 2px solid #80CBC4;
+        }
+
+        .incorrect {
+            color: #E57373;
+            background: rgba(239, 154, 154, 0.2);
+            border: 2px solid #EF9A9A;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        button {
+            background: #80CBC4;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 6px 0 #5FA8A3;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #5FA8A3;
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #5FA8A3;
+        }
+
+        #restart-btn {
+            background: #90CAF9;
+            box-shadow: 0 6px 0 #64B5F6;
+        }
+
+        #restart-btn:hover {
+            box-shadow: 0 8px 0 #64B5F6;
+        }
+
+        #restart-btn:active {
+            box-shadow: 0 3px 0 #64B5F6;
+        }
+
+        .game-over {
+            text-align: center;
+            background: rgba(255, 183, 77, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            border: 2px solid #FFB74D;
+            margin: 0 auto;
+        }
+
+        .final-score {
+            font-size: 3rem;
+            margin: 20px 0;
+            color: #64B5F6;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .clock-label {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1.1rem;
+            color: #64B5F6;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .game-wrapper {
+                padding: 20px;
+            }
+            
+            .clocks-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .clock {
+                width: 150px;
+                height: 150px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .target-time {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-wrapper">
+        <header>
+            <h1>Aprende la Hora</h1>
+            <div class="subtitle">¡Encuentra el reloj correcto!</div>
+        </header>
+
+        <div class="instructions">
+            <p>Mira la hora que aparece en el recuadro azul.</p>
+            <p>Encuentra el reloj que marca exactamente esa hora y haz clic en él.</p>
+            <p>Tienes 4 rondas para conseguir la mayor puntuación.</p>
+        </div>
+
+        <div class="game-info">
+            <div class="info-item">
+                <div class="info-label">Ronda</div>
+                <div class="info-value" id="round">1/4</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Puntos</div>
+                <div class="info-value" id="score">100</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Tiempo</div>
+                <div class="info-value" id="timer">30</div>
+            </div>
+        </div>
+
+        <div class="game-container" id="game-container">
+            <div class="target-time-container">
+                <div class="target-label">Busca esta hora:</div>
+                <div class="target-time" id="target-time">00:00</div>
+            </div>
+            
+            <div class="clocks-container" id="clocks-container">
+                <!-- Los relojes se generarán dinámicamente -->
+            </div>
+            
+            <div class="feedback" id="feedback">¡Haz clic en el reloj correcto!</div>
+            
+            <div class="buttons">
+                <button id="next-btn">Siguiente Ronda</button>
+                <button id="restart-btn">Comenzar de Nuevo</button>
+            </div>
+        </div>
+
+        <div class="game-over hidden" id="game-over">
+            <h2>¡Juego Terminado!</h2>
+            <p>Tu puntuación final es:</p>
+            <div class="final-score" id="final-score">0</div>
+            <button id="play-again-btn">Jugar Otra Vez</button>
+        </div>
+    </div>
+
+    <script>
+        // Variables del juego
+        let currentRound = 1;
+        let score = 100;
+        let timerValue = 30;
+        let timerInterval;
+        let correctClockIndex;
+        let gameActive = true;
+
+        // Elementos del DOM
+        const roundElement = document.getElementById('round');
+        const scoreElement = document.getElementById('score');
+        const timerElement = document.getElementById('timer');
+        const targetTimeElement = document.getElementById('target-time');
+        const clocksContainer = document.getElementById('clocks-container');
+        const feedbackElement = document.getElementById('feedback');
+        const nextButton = document.getElementById('next-btn');
+        const restartButton = document.getElementById('restart-btn');
+        const gameContainer = document.getElementById('game-container');
+        const gameOverContainer = document.getElementById('game-over');
+        const finalScoreElement = document.getElementById('final-score');
+        const playAgainButton = document.getElementById('play-again-btn');
+
+        // Inicializar el juego
+        function initGame() {
+            currentRound = 1;
+            score = 100;
+            timerValue = 30;
+            gameActive = true;
+            
+            updateUI();
+            generateRound();
+            startTimer();
+        }
+
+        // Actualizar la interfaz de usuario
+        function updateUI() {
+            roundElement.textContent = `${currentRound}/4`;
+            scoreElement.textContent = score;
+            timerElement.textContent = timerValue;
+        }
+
+        // Generar una nueva ronda
+        function generateRound() {
+            // Limpiar contenedor de relojes
+            clocksContainer.innerHTML = '';
+            feedbackElement.textContent = '¡Haz clic en el reloj correcto!';
+            feedbackElement.className = 'feedback';
+            
+            // Generar hora objetivo (más simple para niños)
+            const targetHour = Math.floor(Math.random() * 12);
+            const targetMinute = Math.floor(Math.random() * 3) * 5; // Solo 0, 5, 10, 15, etc.
+            const targetTimeString = `${targetHour}:${targetMinute.toString().padStart(2, '0')}`;
+            targetTimeElement.textContent = targetTimeString;
+            
+            // Determinar qué reloj será el correcto
+            correctClockIndex = Math.floor(Math.random() * 4);
+            
+            // Generar 4 relojes con horas diferentes
+            for (let i = 0; i < 4; i++) {
+                const clockWrapper = document.createElement('div');
+                clockWrapper.className = 'clock-wrapper';
+                
+                const clock = document.createElement('div');
+                clock.className = 'clock';
+                clock.dataset.index = i;
+                
+                // Si es el reloj correcto, usar la hora objetivo
+                if (i === correctClockIndex) {
+                    clock.innerHTML = createClockHTML(targetHour, targetMinute);
+                } else {
+                    // Generar una hora incorrecta pero similar
+                    let wrongHour, wrongMinute;
+                    do {
+                        wrongHour = targetHour + Math.floor(Math.random() * 3) - 1;
+                        if (wrongHour < 0) wrongHour += 12;
+                        if (wrongHour >= 12) wrongHour -= 12;
+                        
+                        wrongMinute = targetMinute + (Math.floor(Math.random() * 3) - 1) * 5;
+                        if (wrongMinute < 0) wrongMinute += 60;
+                        if (wrongMinute >= 60) wrongMinute -= 60;
+                    } while (wrongHour === targetHour && wrongMinute === targetMinute);
+                    
+                    clock.innerHTML = createClockHTML(wrongHour, wrongMinute);
+                }
+                
+                // Añadir etiqueta al reloj
+                const clockLabel = document.createElement('div');
+                clockLabel.className = 'clock-label';
+                clockLabel.textContent = `Reloj ${i + 1}`;
+                
+                clockWrapper.appendChild(clock);
+                clockWrapper.appendChild(clockLabel);
+                
+                clock.addEventListener('click', handleClockClick);
+                clocksContainer.appendChild(clockWrapper);
+            }
+        }
+
+        // Crear el HTML para un reloj
+        function createClockHTML(hour, minute) {
+            // Calcular ángulos para las manecillas
+            const hourAngle = (hour % 12) * 30 + minute * 0.5; // 30 grados por hora + 0.5 grados por minuto
+            const minuteAngle = minute * 6; // 6 grados por minuto
+            
+            // Crear números del reloj
+            let numbersHTML = '';
+            for (let i = 1; i <= 12; i++) {
+                const angle = i * 30; // 30 grados por número
+                numbersHTML += `<div class="number" style="transform: rotate(${angle}deg);"><span style="transform: rotate(-${angle}deg);">${i}</span></div>`;
+            }
+            
+            // Crear marcas de minutos
+            let minuteMarksHTML = '';
+            for (let i = 0; i < 60; i++) {
+                const angle = i * 6; // 6 grados por minuto
+                const isHourMark = i % 5 === 0;
+                minuteMarksHTML += `<div class="minute-mark ${isHourMark ? 'hour-mark' : ''}" style="transform: rotate(${angle}deg);"></div>`;
+            }
+            
+            return `
+                <div class="clock-face">
+                    <div class="minute-marks">${minuteMarksHTML}</div>
+                    <div class="numbers">${numbersHTML}</div>
+                    <div class="hour-hand" style="transform: translateX(-50%) rotate(${hourAngle}deg);"></div>
+                    <div class="minute-hand" style="transform: translateX(-50%) rotate(${minuteAngle}deg);"></div>
+                    <div class="center-dot"></div>
+                </div>
+            `;
+        }
+
+        // Manejar clic en un reloj
+        function handleClockClick(event) {
+            if (!gameActive) return;
+            
+            const clickedIndex = parseInt(event.currentTarget.dataset.index);
+            
+            if (clickedIndex === correctClockIndex) {
+                // Respuesta correcta
+                feedbackElement.textContent = '¡Correcto! +25 puntos';
+                feedbackElement.className = 'feedback correct';
+                score += 25;
+            } else {
+                // Respuesta incorrecta
+                feedbackElement.textContent = 'Incorrecto. -10 puntos. ¡Sigue intentando!';
+                feedbackElement.className = 'feedback incorrect';
+                score -= 10;
+                if (score < 0) score = 0;
+            }
+            
+            updateUI();
+            gameActive = false;
+            clearInterval(timerInterval);
+            
+            // Resaltar el reloj correcto
+            const clocks = document.querySelectorAll('.clock');
+            clocks[correctClockIndex].style.boxShadow = '0 0 0 4px #80CBC4, 0 0 20px #80CBC4';
+            clocks[correctClockIndex].style.border = '5px solid #80CBC4';
+            
+            // Oscurecer los relojes incorrectos
+            clocks.forEach((clock, index) => {
+                if (index !== correctClockIndex) {
+                    clock.style.opacity = '0.6';
+                    clock.style.cursor = 'default';
+                }
+            });
+        }
+
+        // Iniciar temporizador
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerValue = 30;
+            timerElement.textContent = timerValue;
+            
+            timerInterval = setInterval(() => {
+                timerValue--;
+                timerElement.textContent = timerValue;
+                
+                if (timerValue <= 10) {
+                    timerElement.style.color = '#FF6B6B';
+                }
+                
+                if (timerValue <= 0) {
+                    clearInterval(timerInterval);
+                    if (gameActive) {
+                        feedbackElement.textContent = '¡Tiempo agotado! -15 puntos. ¡Más rápido la próxima vez!';
+                        feedbackElement.className = 'feedback incorrect';
+                        score -= 15;
+                        if (score < 0) score = 0;
+                        updateUI();
+                        gameActive = false;
+                        
+                        // Resaltar el reloj correcto
+                        const clocks = document.querySelectorAll('.clock');
+                        clocks[correctClockIndex].style.boxShadow = '0 0 0 4px #80CBC4, 0 0 20px #80CBC4';
+                        clocks[correctClockIndex].style.border = '5px solid #80CBC4';
+                        
+                        // Oscurecer todos los relojes
+                        clocks.forEach(clock => {
+                            clock.style.opacity = '0.6';
+                            clock.style.cursor = 'default';
+                        });
+                    }
+                }
+            }, 1000);
+        }
+
+        // Avanzar a la siguiente ronda
+        function nextRound() {
+            if (currentRound >= 4) {
+                endGame();
+                return;
+            }
+            
+            currentRound++;
+            gameActive = true;
+            updateUI();
+            timerElement.style.color = '#64B5F6';
+            generateRound();
+            startTimer();
+        }
+
+        // Terminar el juego
+        function endGame() {
+            gameContainer.classList.add('hidden');
+            gameOverContainer.classList.remove('hidden');
+            finalScoreElement.textContent = score;
+            
+            let message = '';
+            if (score >= 150) {
+                message = '¡Excelente! Eres un experto en relojes.';
+            } else if (score >= 100) {
+                message = '¡Muy bien! Sabes leer la hora perfectamente.';
+            } else if (score >= 50) {
+                message = '¡Buen trabajo! Sigue practicando.';
+            } else {
+                message = '¡Sigue intentándolo! La práctica hace al maestro.';
+            }
+            
+            document.querySelector('.game-over p:last-child').textContent = message;
+        }
+
+        // Event Listeners
+        nextButton.addEventListener('click', nextRound);
+        
+        restartButton.addEventListener('click', () => {
+            gameContainer.classList.remove('hidden');
+            gameOverContainer.classList.add('hidden');
+            initGame();
+        });
+        
+        playAgainButton.addEventListener('click', () => {
+            gameContainer.classList.remove('hidden');
+            gameOverContainer.classList.add('hidden');
+            initGame();
+        });
+
+        // Iniciar el juego al cargar la página
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>

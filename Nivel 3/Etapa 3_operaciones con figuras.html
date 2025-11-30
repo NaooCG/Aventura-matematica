@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juego de Áreas y Perímetros</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Fredoka', sans-serif;
+  }
+
+  body {
+    background: linear-gradient(135deg, #E8F4F8 0%, #F5F5F5 100%);
+    color: #002244;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .game-container {
+    background: linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%);
+    border: 4px solid #E0E0E0;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    padding: 40px;
+    margin-top: 20px;
+    width: 90%;
+    max-width: 600px;
+  }
+
+  h1 {
+    color: #64B5F6;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  p {
+    color: #FFB74D;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+
+  button, input {
+    padding: 12px 20px;
+    margin: 10px;
+    font-size: 1.1rem;
+    border-radius: 60px;
+    border: 3px solid #80CBC4;
+    font-family: 'Fredoka', sans-serif;
+  }
+
+  button {
+    background: #80CBC4;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 700;
+    box-shadow: 0 6px 0 #5FA8A3, 0 8px 20px rgba(0,0,0,0.15);
+  }
+
+  button:hover {
+    background: #80CBC4;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 0 #5FA8A3, 0 12px 25px rgba(0,0,0,0.2);
+  }
+
+  button:active {
+    transform: translateY(2px);
+    box-shadow: 0 3px 0 #5FA8A3, 0 5px 15px rgba(0,0,0,0.15);
+  }
+
+  input {
+    background: white;
+    color: #333;
+    border: 3px solid #90CAF9;
+    width: 200px;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  #resultado {
+    font-weight: bold;
+    font-size: 1.3rem;
+    margin-top: 15px;
+    color: #64B5F6;
+  }
+
+  #nivel {
+    font-size: 1.3rem;
+    color: #FFB74D;
+    margin-bottom: 20px;
+    font-weight: 700;
+    background: #FFF9E6;
+    padding: 12px 20px;
+    border-radius: 60px;
+    border: 3px solid #FFB74D;
+  }
+
+  #puntuacionAnimada {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    font-weight: bold;
+    opacity: 0;
+    transition: all 0.6s ease-out;
+    z-index: 100;
+  }
+
+  .problem-section {
+    background: #E6F2FF;
+    padding: 25px;
+    border-radius: 20px;
+    margin: 20px 0;
+    border: 3px solid #90CAF9;
+  }
+
+  #nombreFigura {
+    color: #64B5F6;
+    font-size: 1.8em;
+    margin-bottom: 15px;
+    font-weight: 700;
+  }
+
+  #problema {
+    font-size: 1.4em;
+    color: #FFB74D;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  #formula {
+    font-size: 1.2em;
+    color: #5FA8A3;
+    font-weight: 600;
+    background: #E8F5E9;
+    padding: 12px;
+    border-radius: 12px;
+    margin: 15px 0;
+    border: 2px solid #80CBC4;
+  }
+
+  .input-section {
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="game-container">
+  <h1>🎯 Juego de Áreas y Perímetros</h1>
+  <p> Diviértete y Aprende con 🟩🔺⚪</p>
+
+  <div id="nivel">Nivel: 1 | Puntos: 0</div>
+  
+  <div class="problem-section">
+    <h2 id="nombreFigura"></h2>
+    <p id="problema"></p>
+    <p id="formula"></p>
+  </div>
+
+  <div class="input-section">
+    <input type="number" id="respuesta" placeholder="Escribe tu resultado">
+    <br>
+    <button id="verificarBtn">Verificar</button>
+    <p id="resultado"></p>
+  </div>
+</div>
+
+<div id="puntuacionAnimada"></div>
+
+<script>
+const figuras = [
+  "Cuadrado", 
+  "Rectángulo",
+  "Triángulo",
+  "Círculo",
+  "Rombo",
+  "Trapecio",
+  "Paralelogramo",
+  "Pentágono",
+  "Hexágono",
+  "Octágono"
+];
+
+// 🔹 SOLO 10 retos (uno por cada figura, alternando área o perímetro)
+let retos = [];
+figuras.forEach(fig => {
+  const tipo = Math.random() < 0.5 ? "area" : "perimetro";
+  retos.push({ figura: fig, tipo: tipo });
+});
+
+// Mezclamos los retos
+retos = retos.sort(() => Math.random() - 0.5);
+
+let nivel = 1;
+let puntos = 0;
+let resultadoCorrecto = 0;
+let retoActual = null;
+
+function mostrarPuntuacionAnimada(texto, color) {
+  const animacion = document.getElementById("puntuacionAnimada");
+  animacion.style.color = color;
+  animacion.textContent = texto;
+  animacion.style.opacity = 1;
+  animacion.style.top = "45%";
+  setTimeout(() => {
+    animacion.style.opacity = 0;
+    animacion.style.top = "40%";
+  }, 800);
+}
+
+function generarProblema() {
+  if (nivel > retos.length) {
+    alert(`🎉 ¡Felicidades! Has completado los 10 niveles con ${puntos} puntos 🏆`);
+    nivel = 1;
+    puntos = 0;
+    retos = retos.sort(() => Math.random() - 0.5);
+  }
+
+  retoActual = retos[nivel - 1];
+  const figura = retoActual.figura;
+  const tipo = retoActual.tipo;
+
+  let a = Math.floor(Math.random() * 8) + 2;
+  let b = Math.floor(Math.random() * 8) + 2;
+  let c = Math.floor(Math.random() * 8) + 2;
+  let formula = "";
+  let problema = "";
+
+  document.getElementById("nombreFigura").innerText = `🔹 Figura: ${figura} (${tipo === "area" ? "Área" : "Perímetro"})`;
+
+  switch (figura) {
+    case "Cuadrado":
+      if (tipo === "area") {
+        formula = "Área = lado × lado";
+        problema = `Lado = ${a}`;
+        resultadoCorrecto = a * a;
+      } else {
+        formula = "Perímetro = 4 × lado";
+        problema = `Lado = ${a}`;
+        resultadoCorrecto = 4 * a;
+      }
+      break;
+
+    case "Rectángulo":
+      if (tipo === "area") {
+        formula = "Área = base × altura";
+        problema = `Base = ${a}, Altura = ${b}`;
+        resultadoCorrecto = a * b;
+      } else {
+        formula = "Perímetro = 2 × (base + altura)";
+        problema = `Base = ${a}, Altura = ${b}`;
+        resultadoCorrecto = 2 * (a + b);
+      }
+      break;
+
+    case "Triángulo":
+      if (tipo === "area") {
+        formula = "Área = (base × altura) / 2";
+        problema = `Base = ${a}, Altura = ${b}`;
+        resultadoCorrecto = (a * b) / 2;
+      } else {
+        formula = "Perímetro = lado1 + lado2 + lado3";
+        problema = `Lados: ${a}, ${b}, ${c}`;
+        resultadoCorrecto = a + b + c;
+      }
+      break;
+
+    case "Círculo":
+      if (tipo === "area") {
+        formula = "Área = π × r² (usa π ≈ 3.14)";
+        problema = `Radio = ${a}`;
+        resultadoCorrecto = 3.14 * a * a;
+      } else {
+        formula = "Perímetro = 2 × π × r (usa π ≈ 3.14)";
+        problema = `Radio = ${a}`;
+        resultadoCorrecto = 2 * 3.14 * a;
+      }
+      break;
+
+    case "Rombo":
+      if (tipo === "area") {
+        formula = "Área = (D × d) / 2";
+        problema = `Diagonales: D = ${a}, d = ${b}`;
+        resultadoCorrecto = (a * b) / 2;
+      } else {
+        formula = "Perímetro = 4 × lado";
+        problema = `Lado = ${a}`;
+        resultadoCorrecto = 4 * a;
+      }
+      break;
+
+    case "Trapecio":
+      if (tipo === "area") {
+        formula = "Área = ((B + b) × h) / 2";
+        problema = `B = ${a}, b = ${b}, h = ${c}`;
+        resultadoCorrecto = ((a + b) * c) / 2;
+      } else {
+        formula = "Perímetro = suma de los 4 lados";
+        problema = `Lados: ${a}, ${b}, ${c}, ${a + 1}`;
+        resultadoCorrecto = a + b + c + (a + 1);
+      }
+      break;
+
+    case "Paralelogramo":
+      if (tipo === "area") {
+        formula = "Área = base × altura";
+        problema = `Base = ${a}, Altura = ${b}`;
+        resultadoCorrecto = a * b;
+      } else {
+        formula = "Perímetro = 2 × (base + lado)";
+        problema = `Base = ${a}, Lado = ${b}`;
+        resultadoCorrecto = 2 * (a + b);
+      }
+      break;
+
+    case "Pentágono":
+      if (tipo === "area") {
+        formula = "Área = (perímetro × apotema) / 2";
+        problema = `Perímetro = ${a * 5}, Apotema = ${b}`;
+        resultadoCorrecto = (a * 5 * b) / 2;
+      } else {
+        formula = "Perímetro = 5 × lado";
+        problema = `Lado = ${a}`;
+        resultadoCorrecto = 5 * a;
+      }
+      break;
+
+    case "Hexágono":
+      if (tipo === "area") {
+        formula = "Área = (perímetro × apotema) / 2";
+        problema = `Perímetro = ${a * 6}, Apotema = ${b}`;
+        resultadoCorrecto = (a * 6 * b) / 2;
+      } else {
+        formula = "Perímetro = 6 × lado";
+        problema = `Lado = ${a}`;
+        resultadoCorrecto = 6 * a;
+      }
+      break;
+
+    case "Octágono":
+      if (tipo === "area") {
+        formula = "Área = (perímetro × apotema) / 2";
+        problema = `Perímetro= ${a*8}, Apotema= ${b}`;
+        resultadoCorrecto = (a * 8 * b) / 2;
+      } else {
+        formula = "Perímetro = 8 × lado";
+        problema = `Lado = ${a}`;
+        resultadoCorrecto = 8 * a;
+      }
+      break;
+  }
+
+  document.getElementById("problema").innerText = problema;
+  document.getElementById("formula").innerText = formula;
+  document.getElementById("respuesta").value = "";
+  document.getElementById("resultado").innerText = "";
+  document.getElementById("nivel").innerText = `Nivel: ${nivel} / 10 | Puntos: ${puntos}`;
+}
+
+document.getElementById("verificarBtn").addEventListener("click", () => {
+  let respuesta = parseFloat(document.getElementById("respuesta").value);
+  if (isNaN(respuesta)) {
+    alert("Por favor, escribe un número válido.");
+    return;
+  }
+
+  let diferencia = Math.abs(respuesta - resultadoCorrecto);
+  if (diferencia < 0.1) {
+    puntos += 10;
+    mostrarPuntuacionAnimada("+10", "#5FA8A3");
+    document.getElementById("resultado").innerHTML = "✅ ¡Excelente! +10 puntos";
+    nivel++;
+  } else {
+    puntos = Math.max(0, puntos - 10);
+    nivel = Math.max(1, nivel - 1);
+    mostrarPuntuacionAnimada("-10", "#E57373");
+    document.getElementById("resultado").innerHTML = `❌ Incorrecto. Era ${resultadoCorrecto.toFixed(2)}`;
+  }
+
+  setTimeout(generarProblema, 1500);
+});
+
+generarProblema();
+</script>
+</body>
+</html>

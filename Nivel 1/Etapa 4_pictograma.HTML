@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detective Galletín: ¡Clasifica las Migajas!</title>
+
+  <!-- TIPOGRAFÍA FREDOKA -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background-color: #FAFAFA;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #4FC3F7;
+      font-size: 2.4em;
+      font-weight: 600;
+    }
+
+    .scene {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 20px;
+    }
+
+    .crumb {
+      cursor: grab;
+      animation: bounce 1.4s infinite;
+      display: inline-block;
+      transition: transform 0.3s;
+    }
+    .crumb:hover { transform: scale(1.1); }
+
+    /* Formas base */
+    .round { border-radius: 50%; width: 70px; height: 70px; }
+    .oval-h { border-radius: 50%; width: 90px; height: 60px; }
+    .oval-v { border-radius: 50%; width: 60px; height: 90px; }
+    .semicircle {
+      width: 70px; height: 35px;
+      border-top-left-radius: 70px;
+      border-top-right-radius: 70px;
+      border-bottom: none;
+    }
+
+    .square { width: 70px; height: 70px; }
+    .rectangle-h { width: 90px; height: 50px; }
+    .rectangle-v { width: 50px; height: 90px; }
+    .rhombus {
+      width: 70px; height: 70px;
+      transform: rotate(45deg);
+      margin: 25px;
+    }
+
+    .triangle-eq {
+      width: 0; height: 0;
+      border-left: 35px solid transparent;
+      border-right: 35px solid transparent;
+      border-bottom: 70px solid;
+    }
+    .triangle-iso {
+      width: 0; height: 0;
+      border-left: 50px solid transparent;
+      border-right: 50px solid transparent;
+      border-bottom: 50px solid;
+    }
+    .triangle-rt {
+      width: 0; height: 0;
+      border-left: 70px solid;
+      border-bottom: 70px solid transparent;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .container {
+      border: 3px dashed #ccc;
+      padding: 12px;
+      width: 160px;
+      min-height: 110px;
+      margin: 12px;
+      border-radius: 20px;
+      background-color: #FFFFFF;
+      box-shadow: 0px 3px 8px rgba(0,0,0,0.1);
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    .label {
+      font-weight: 600;
+      color: #555;
+      margin-top: 8px;
+    }
+
+    .message {
+      font-size: 20px;
+      margin-top: 15px;
+      min-height: 30px;
+    }
+
+    /* 🟥 Cajita de error bonita */
+    .error-box {
+      background: #FFCDD2;
+      color: #C62828;
+      padding: 10px 15px;
+      border-left: 6px solid #C62828;
+      border-radius: 8px;
+      display: inline-block;
+      font-weight: 600;
+      animation: fade 0.5s ease;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .pictogram {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 30px;
+    }
+    .bar {
+      width: 60px;
+      background-color: #81C784;
+      margin-top: 5px;
+      transition: height 0.3s;
+      border-radius: 10px;
+    }
+
+    #final-screen {
+      margin-top: 25px;
+      font-size: 26px;
+      font-weight: bold;
+      color: #4CAF50;
+      display: none;
+    }
+
+    .btn-restart {
+      background: #4FC3F7;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      margin-top: 15px;
+    }
+    .btn-restart:hover { background: #039BE5; }
+  </style>
+</head>
+<body>
+
+<h1>🕵️‍♂️ Detective Galletín: ¡Clasifica las Migajas!</h1>
+<p>¡Arrastra las migajas a la <b>familia de figuras</b> correcta! (Total: 15 Migajas)</p>
+
+<div class="scene" id="scene">
+  <!-- Figuras Redondas -->
+  <div class="crumb round" draggable="true" data-type="round"></div>
+  <div class="crumb oval-h" draggable="true" data-type="round"></div>
+  <div class="crumb semicircle" draggable="true" data-type="round"></div>
+  <div class="crumb round" draggable="true" data-type="round"></div>
+  <div class="crumb oval-v" draggable="true" data-type="round"></div>
+
+  <!-- Cuadradas -->
+  <div class="crumb square" draggable="true" data-type="square"></div>
+  <div class="crumb rectangle-h" draggable="true" data-type="square"></div>
+  <div class="crumb rhombus" draggable="true" data-type="square"></div>
+  <div class="crumb rectangle-v" draggable="true" data-type="square"></div>
+  <div class="crumb square" draggable="true" data-type="square"></div>
+
+  <!-- Triangulares -->
+  <div class="crumb triangle-eq" draggable="true" data-type="triangle"></div>
+  <div class="crumb triangle-iso" draggable="true" data-type="triangle"></div>
+  <div class="crumb triangle-rt" draggable="true" data-type="triangle"></div>
+  <div class="crumb triangle-eq" draggable="true" data-type="triangle"></div>
+  <div class="crumb triangle-iso" draggable="true" data-type="triangle"></div>
+</div>
+
+<hr>
+
+<div id="zones">
+  <div class="container" ondragover="allowDrop(event)" ondrop="drop(event, 'round')">
+    <div class="label">🔵 Familia Redonda</div>
+  </div>
+  <div class="container" ondragover="allowDrop(event)" ondrop="drop(event, 'square')">
+    <div class="label">🟦 Familia Cuadrada</div>
+  </div>
+  <div class="container" ondragover="allowDrop(event)" ondrop="drop(event, 'triangle')">
+    <div class="label">🔺 Familia Triangular</div>
+  </div>
+</div>
+
+<div class="message" id="message"></div>
+
+<hr>
+
+<h2>📊 Pictograma de Migajas Clasificadas</h2>
+<div class="pictogram">
+  <div>
+    <div class="bar" id="bar-round" style="height: 0px;"></div>
+    <div class="label">🔵 Redondas</div>
+  </div>
+  <div>
+    <div class="bar" id="bar-square" style="height: 0px;"></div>
+    <div class="label">🟦 Cuadradas</div>
+  </div>
+  <div>
+    <div class="bar" id="bar-triangle" style="height: 0px;"></div>
+    <div class="label">🔺 Triangulares</div>
+  </div>
+</div>
+
+<p id="remaining-message">Migajas restantes: 15</p>
+
+<div id="final-screen"></div>
+
+<script>
+  let counts = { round: 0, square: 0, triangle: 0 };
+  const totalCrumbCount = 15;
+
+  /* 🎨 Colores aleatorios suaves */
+  function randomColor() {
+    const soft = ["#FFB6C1", "#FFD59E", "#FFECB3", "#C5E1A5", "#B3E5FC", "#D1C4E9"];
+    return soft[Math.floor(Math.random() * soft.length)];
+  }
+
+  /* 🔄 Mezclar las figuras aleatoriamente */
+  function shuffleElements(container) {
+    for (let i = container.children.length; i >= 0; i--) {
+      container.appendChild(container.children[Math.random() * i | 0]);
+    }
+  }
+
+  function allowDrop(ev) { ev.preventDefault(); }
+
+  function drop(ev, familyType) {
+    ev.preventDefault();
+    const id = ev.dataTransfer.getData("text");
+    const crumb = document.getElementById(id);
+    if (!crumb) return;
+
+    if (crumb.dataset.type === familyType) {
+      crumb.remove();
+      counts[familyType]++;
+      updateBars();
+      checkFinish();
+    } else {
+      showMessage("❌ ¡Ups! Esa figura no pertenece a esta familia.");
+    }
+  }
+
+  /* 🟥 Mensaje de error bonito */
+  function showMessage(text) {
+    const msg = document.getElementById('message');
+    msg.innerHTML = `<div class="error-box">${text}</div>`;
+    setTimeout(() => { msg.innerHTML = ""; }, 2500);
+  }
+
+  function updateBars() {
+    document.getElementById('bar-round').style.height = (counts.round * 20) + 'px';
+    document.getElementById('bar-square').style.height = (counts.square * 20) + 'px';
+    document.getElementById('bar-triangle').style.height = (counts.triangle * 20) + 'px';
+    document.getElementById('remaining-message').innerText =
+      "Migajas restantes: " + (totalCrumbCount - (counts.round + counts.square + counts.triangle));
+  }
+
+  function checkFinish() {
+    if ((counts.round + counts.square + counts.triangle) === totalCrumbCount) {
+      document.getElementById("zones").style.display = "none";
+      showMessage("");
+
+      document.getElementById("final-screen").style.display = "block";
+      document.getElementById("final-screen").innerHTML =
+        "🎉 ¡Excelente trabajo Detective Galletín! 🍪🕵️‍♂️<br> ¡Clasificaste todas las migajas!";
+
+      const btn = document.createElement("button");
+      btn.className = "btn-restart";
+      btn.textContent = "Jugar otra vez 🔁";
+      btn.onclick = () => location.reload();
+      document.getElementById("final-screen").appendChild(btn);
+    }
+  }
+
+  /* Asignar IDs, colores aleatorios y mezclar */
+  const scene = document.getElementById("scene");
+
+  document.querySelectorAll('.crumb').forEach((el, index) => {
+    el.id = 'crumb-' + index;
+
+    /* Color aleatorio */
+    if (!el.classList.contains("triangle-eq") &&
+        !el.classList.contains("triangle-iso") &&
+        !el.classList.contains("triangle-rt")) {
+      el.style.background = randomColor();
+    } else {
+      /* Para triángulos el color va en border */
+      el.style.borderBottomColor = randomColor();
+      el.style.borderLeftColor = randomColor();
+    }
+
+    /* Activar drag */
+    el.addEventListener('dragstart', ev => ev.dataTransfer.setData("text", ev.target.id));
+  });
+
+  /* Mezclar figuras */
+  shuffleElements(scene);
+</script>
+
+</body>
+</html>
+
+
+
+

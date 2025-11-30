@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isla de las Matemáticas - Gráficas Interactivas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #D0F2FF 0%, #FDFDFD 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 900px;
+            background: linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%);
+            border: 4px solid #E0E0E0;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        h1 {
+            color: #64B5F6;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        #puntos {
+            margin-top: 10px;
+            font-size: 1.3em;
+            color: #5FA8A3;
+            font-weight: bold;
+        }
+
+        #historia {
+            background: rgba(239, 154, 154, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            color: #666;
+            max-width: 650px;
+            margin: 20px auto;
+            font-size: 1.2em;
+            line-height: 1.6;
+            border: 2px solid #EF9A9A;
+        }
+
+        #historia b {
+            color: #64B5F6;
+        }
+
+        .graph-section {
+            background: rgba(144, 202, 249, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid #90CAF9;
+        }
+
+        #contenedor-grafica {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            align-items: flex-end;
+            position: relative;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            border: 2px solid #E0E0E0;
+        }
+
+        .barra {
+            width: 70px;
+            background: #80CBC4;
+            border-radius: 8px 8px 0 0;
+            color: white;
+            font-weight: bold;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 5px;
+            box-shadow: 0 4px 0 #5FA8A3;
+            transform: scaleY(0);
+            animation: crecer 0.8s ease-out forwards;
+        }
+
+        @keyframes crecer {
+            from { transform: scaleY(0); }
+            to { transform: scaleY(1); }
+        }
+
+        .etiqueta {
+            margin-top: 6px;
+            font-size: 16px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        #pregunta {
+            margin-top: 30px;
+            background: rgba(255, 213, 79, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.3em;
+            border: 2px solid #FFD54F;
+            color: #666;
+        }
+
+        #respuesta {
+            margin-top: 20px;
+            font-size: 1.2em;
+            padding: 12px 20px;
+            width: 230px;
+            border-radius: 60px;
+            border: 2px solid #90CAF9;
+            background: white;
+            text-align: center;
+        }
+
+        button {
+            margin-top: 10px;
+            background: #80CBC4;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 60px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 700;
+            transition: 0.3s;
+            box-shadow: 0 6px 0 #5FA8A3;
+            margin: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #5FA8A3;
+        }
+
+        #mensaje {
+            margin-top: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 10px;
+            min-height: 60px;
+        }
+
+        .correcto {
+            color: #5FA8A3;
+            background: rgba(128, 203, 196, 0.1);
+            border: 2px solid #80CBC4;
+        }
+
+        .incorrecto {
+            color: #E57373;
+            background: rgba(239, 154, 154, 0.1);
+            border: 2px solid #EF9A9A;
+        }
+
+        @media (max-width: 768px) {
+            .barra { width: 50px; }
+            h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="game-container">
+    <h1>🌴 Isla de las Matemáticas 🦜</h1>
+    <div id="puntos">Puntos: 0</div>
+
+    <div id="historia">
+        ¡Hola explorador! Soy <b>Kico</b>, el loro guardián de esta isla.
+        Observa bien la gráfica y responde a cada pregunta para avanzar.
+    </div>
+
+    <div class="graph-section">
+        <h2>Cantidad de animales en la isla</h2>
+
+        <div id="contenedor-grafica"></div>
+    </div>
+
+    <div id="pregunta"></div>
+    <input type="text" id="respuesta" placeholder="Escribe tu respuesta">
+    
+    <br>
+    <button onclick="verificar()">Comprobar</button>
+    <button onclick="nuevaPregunta()">Siguiente pregunta 🔄</button>
+
+    <div id="mensaje"></div>
+</div>
+
+<script>
+    const datos = [
+        { animal: "Tortugas", cantidad: 6 },
+        { animal: "Guacamayas", cantidad: 9 },
+        { animal: "Iguanas", cantidad: 4 },
+        { animal: "Cocodrilos", cantidad: 7 }
+    ];
+
+    let puntos = 0;
+    let preguntasRespondidas = 0;
+    const totalPreguntas = 7;
+    let preguntaAnterior = "";
+
+    const mensajesCorrecto = [
+        "¡Genial! ¡Eres un maestro de las gráficas! 🌟",
+        "¡Correcto! ¡Kico está muy orgulloso! 🦜",
+        "¡Bien hecho explorador! 💪",
+        "¡Siiii! ¡Respuesta perfecta! 🎉"
+    ];
+
+    const mensajesIncorrecto = [
+        "Uuuy… Kico cree que puedes observar mejor 👀",
+        "No es correcto… intenta fijarte en las barras",
+        "Casi, casi… ¡no te rindas! 💛"
+    ];
+
+    // Crear barras
+    const cont = document.getElementById("contenedor-grafica");
+    datos.forEach(d => {
+        const c = document.createElement("div");
+        c.style.textAlign = "center";
+
+        const b = document.createElement("div");
+        b.className = "barra";
+        b.style.height = (d.cantidad * 25) + "px";
+        b.textContent = d.cantidad;
+
+        const etiqueta = document.createElement("div");
+        etiqueta.className = "etiqueta";
+        etiqueta.textContent = d.animal;
+
+        c.appendChild(b);
+        c.appendChild(etiqueta);
+        cont.appendChild(c);
+    });
+
+    let preguntaActual = {};
+    const cajaPregunta = document.getElementById("pregunta");
+    const cajaRespuesta = document.getElementById("respuesta");
+    const cajaMensaje = document.getElementById("mensaje");
+
+    function nuevaPregunta() {
+        if (preguntasRespondidas >= totalPreguntas) {
+            return finalDelJuego();
+        }
+
+        cajaMensaje.innerHTML = "";
+        cajaMensaje.className = "";
+        cajaRespuesta.value = "";
+
+        let tipo;
+        do {
+            tipo = Math.floor(Math.random()*4);
+        } while (tipo === preguntaAnterior);
+        preguntaAnterior = tipo;
+
+        if (tipo === 0) {
+            preguntaActual = datos[Math.floor(Math.random()*datos.length)];
+            cajaPregunta.innerHTML = `¿Cuántas <b>${preguntaActual.animal}</b> hay en la isla?`;
+        }
+        else if (tipo === 1) {
+            let a = datos[Math.floor(Math.random()*datos.length)];
+            let b = datos[Math.floor(Math.random()*datos.length)];
+            while (a === b) b = datos[Math.floor(Math.random()*datos.length)];
+
+            preguntaActual = { tipo: "comparacion", a, b };
+            cajaPregunta.innerHTML = `¿Cuál hay más: <b>${a.animal}</b> o <b>${b.animal}</b>?`;
+        }
+        else if (tipo === 2) {
+            let a = datos[Math.floor(Math.random()*datos.length)];
+            let b = datos[Math.floor(Math.random()*datos.length)];
+
+            preguntaActual = { tipo: "diferencia", a, b };
+            cajaPregunta.innerHTML =
+                `¿Cuántas más <b>${a.animal}</b> hay que <b>${b.animal}</b>?`;
+        }
+        else {
+            let total = datos.reduce((s,d)=>s+d.cantidad,0);
+            preguntaActual = { tipo: "total", total };
+            cajaPregunta.innerHTML = `¿Cuántos animales hay en total en la isla?`;
+        }
+    }
+
+    function verificar() {
+        if (preguntasRespondidas >= totalPreguntas) return;
+
+        let r = cajaRespuesta.value.trim();
+        preguntasRespondidas++;
+
+        let correcto = false;
+
+        if (preguntaActual.cantidad !== undefined) {
+            correcto = (r == preguntaActual.cantidad);
+        }
+        else if (preguntaActual.tipo === "comparacion") {
+            let mayor = preguntaActual.a.cantidad > preguntaActual.b.cantidad ?
+                        preguntaActual.a.animal : preguntaActual.b.animal;
+
+            correcto = (r.toLowerCase() === mayor.toLowerCase());
+        }
+        else if (preguntaActual.tipo === "diferencia") {
+            let dif = Math.abs(preguntaActual.a.cantidad - preguntaActual.b.cantidad);
+            correcto = (r == dif);
+        }
+        else if (preguntaActual.tipo === "total") {
+            correcto = (r == preguntaActual.total);
+        }
+
+        if (correcto) mostrarCorrecto();
+        else mostrarIncorrecto();
+
+        setTimeout(nuevaPregunta, 1200);
+    }
+
+    function mostrarCorrecto() {
+        puntos++;
+        document.getElementById("puntos").textContent = `Puntos: ${puntos}`;
+        cajaMensaje.innerHTML = mensajesCorrecto[Math.floor(Math.random()*mensajesCorrecto.length)];
+        cajaMensaje.className = "correcto";
+    }
+
+    function mostrarIncorrecto() {
+        cajaMensaje.innerHTML = mensajesIncorrecto[Math.floor(Math.random()*mensajesIncorrecto.length)];
+        cajaMensaje.className = "incorrecto";
+    }
+
+    function finalDelJuego() {
+        cajaPregunta.innerHTML = "";
+        document.getElementById("respuesta").style.display = "none";
+        document.querySelectorAll("button").forEach(btn=> btn.style.display="none");
+
+        cajaMensaje.innerHTML = `
+            🎉 ¡Has completado tu aventura!<br><br>
+            Respuestas correctas: <b>${puntos} de ${totalPreguntas}</b><br><br>
+            Kico te felicita, gran explorador. 🦜✨
+        `;
+        cajaMensaje.className = "correcto";
+
+        let reiniciar = document.createElement("button");
+        reiniciar.textContent = "Jugar otra vez 🔁";
+        reiniciar.style.marginTop = "20px";
+        reiniciar.style.display = "block";
+        reiniciar.onclick = () => location.reload();
+        document.querySelector('.game-container').appendChild(reiniciar);
+    }
+
+    nuevaPregunta();
+</script>
+
+</body>
+</html>

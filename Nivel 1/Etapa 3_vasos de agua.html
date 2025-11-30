@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Vasos de Agua para Niños</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #E8F4F8 0%, #F5F5F5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%);
+            border: 4px solid #E0E0E0;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            max-width: 850px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #64B5F6;
+            margin-bottom: 15px;
+            font-weight: 900;
+            font-size: 2.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            color: #2c3e50;
+            background: #FFB74D;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 6px 0 #F57C00;
+            color: white;
+            font-weight: 700;
+        }
+
+        .cups-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .cup-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .cup {
+            width: 130px;
+            height: 180px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s, filter 0.3s;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+        }
+
+        .cup:hover {
+            transform: translateY(-10px);
+            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.3));
+        }
+
+        .cup-body {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 85%;
+            background: linear-gradient(to right, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+            border: 4px solid #80CBC4;
+            border-radius: 5px 5px 40px 40px;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .cup-base {
+            position: absolute;
+            bottom: 0;
+            width: 120%;
+            height: 15px;
+            background: #80CBC4;
+            border-radius: 50%;
+            left: -10%;
+            z-index: 1;
+        }
+
+        .water {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, #36D1DC, #5B86E5);
+            border-radius: 0 0 35px 35px;
+            transition: height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 1;
+        }
+
+        .water-surface {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 10px;
+            background: rgba(91, 134, 229, 0.7);
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .cup-number {
+            margin-top: 15px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+            background: #90CAF9;
+            padding: 8px 20px;
+            border-radius: 20px;
+            box-shadow: 0 6px 0 #64B5F6;
+        }
+
+        .controls {
+            margin-top: 25px;
+        }
+
+        button {
+            background: #80CBC4;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 700;
+            box-shadow: 0 6px 0 #5FA8A3;
+        }
+
+        button:hover {
+            background: #80CBC4;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #5FA8A3;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 1.8rem;
+            font-weight: 600;
+            min-height: 40px;
+            padding: 15px;
+            border-radius: 15px;
+            transition: all 0.3s;
+        }
+
+        .correct {
+            color: #5FA8A3;
+            background-color: rgba(128, 203, 196, 0.15);
+            border: 3px solid #5FA8A3;
+        }
+
+        .incorrect {
+            color: #E57373;
+            background-color: rgba(239, 154, 154, 0.15);
+            border: 3px solid #E57373;
+        }
+
+        .game-over {
+            font-size: 2.5rem;
+            color: #64B5F6;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: rgba(100, 181, 246, 0.15);
+            border-radius: 15px;
+            border: 3px solid #64B5F6;
+        }
+
+        .final-score {
+            font-size: 2rem;
+            color: #FFB74D;
+            margin: 20px 0;
+        }
+
+        /* CAMBIO PRINCIPAL: Nuevo color para las instrucciones */
+        .instructions {
+            background: #64B5F6; /* Cambiado de #FFB74D a #64B5F6 */
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 0 #42A5F5; /* Cambiado de #F57C00 a #42A5F5 */
+            color: white;
+            font-size: 1.4rem;
+            line-height: 1.5;
+            font-weight: 700;
+        }
+
+        .stars {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .star {
+            width: 40px;
+            height: 40px;
+            background-color: #FFB74D;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        }
+
+        .character {
+            width: 80px;
+            height: 80px;
+            background-color: #FFB74D;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            position: relative;
+            box-shadow: 0 6px 0 #F57C00;
+        }
+
+        .character-face {
+            position: absolute;
+            width: 60%;
+            height: 60%;
+            top: 20%;
+            left: 20%;
+        }
+
+        .character-eye {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+        .character-eye.left {
+            top: 25%;
+            left: 25%;
+        }
+
+        .character-eye.right {
+            top: 25%;
+            right: 25%;
+        }
+
+        .character-smile {
+            position: absolute;
+            width: 40px;
+            height: 20px;
+            border-bottom: 4px solid white;
+            border-radius: 0 0 20px 20px;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .trophy {
+            width: 60px;
+            height: 60px;
+            background-color: #FFB74D;
+            margin: 0 auto 15px;
+            position: relative;
+            border-radius: 10px 10px 5px 5px;
+            box-shadow: 0 6px 0 #F57C00;
+        }
+
+        .trophy:before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #FFB74D;
+            border-radius: 50%;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .trophy:after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 10px;
+            background-color: #F57C00;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .icon-thumbs-up {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: #80CBC4;
+            margin: 0 10px;
+            position: relative;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .icon-thumbs-up:before {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 20px;
+            background-color: #80CBC4;
+            border-radius: 10px 10px 0 0;
+            top: -15px;
+            left: 7px;
+        }
+
+        @media (max-width: 768px) {
+            .cups-container {
+                gap: 20px;
+            }
+            
+            .cup {
+                width: 110px;
+                height: 160px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .instructions {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>¿Qué Vaso Tiene Más Agua?</h1>
+        
+        <div class="instructions">
+            <div class="character">
+                <div class="character-face">
+                    <div class="character-eye left"></div>
+                    <div class="character-eye right"></div>
+                    <div class="character-smile"></div>
+                </div>
+            </div>
+            <p><strong>¡Hola amiguito!</strong></p>
+            <p>Mira los vasos con agua y elige el que tiene <strong>MÁS AGUA</strong>.</p>
+            <p>¡Gana puntos por cada respuesta correcta!</p>
+        </div>
+        
+        <div class="game-info">
+            <div class="round">Ronda: <span id="round-count">1</span>/4</div>
+            <div class="score">Puntos: <span id="score">0</span></div>
+        </div>
+        
+        <div class="cups-container" id="cups-container">
+            <!-- Los vasos se generarán con JavaScript -->
+        </div>
+        
+        <div class="message" id="message"></div>
+        
+        <div class="controls">
+            <button id="next-round" style="display: none;">Siguiente Ronda</button>
+        </div>
+    </div>
+
+    <script>
+        // Variables del juego
+        let currentRound = 1;
+        let score = 0;
+        let gameActive = true;
+
+        // Elementos del DOM
+        const roundCountElement = document.getElementById('round-count');
+        const scoreElement = document.getElementById('score');
+        const cupsContainer = document.getElementById('cups-container');
+        const messageElement = document.getElementById('message');
+        const nextRoundButton = document.getElementById('next-round');
+
+        // Sonidos (usando AudioContext para compatibilidad)
+        function playSound(frequency, duration, type) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch (e) {
+                console.log("Los sonidos no están disponibles en este navegador");
+            }
+        }
+
+        // Inicializar el juego
+        function initGame() {
+            currentRound = 1;
+            score = 0;
+            gameActive = true;
+            roundCountElement.textContent = currentRound;
+            scoreElement.textContent = score;
+            messageElement.textContent = '';
+            messageElement.className = 'message';
+            nextRoundButton.style.display = 'none';
+            
+            generateCups();
+        }
+
+        // Generar vasos con cantidades aleatorias de agua
+        function generateCups() {
+            cupsContainer.innerHTML = '';
+            
+            // Crear 3 vasos con cantidades aleatorias de agua
+            const waterLevels = [];
+            for (let i = 0; i < 3; i++) {
+                waterLevels.push(Math.floor(Math.random() * 60) + 40); // Entre 40% y 100%
+            }
+            
+            // Encontrar el vaso con más agua
+            const maxWaterIndex = waterLevels.indexOf(Math.max(...waterLevels));
+            
+            // Crear los elementos de los vasos
+            for (let i = 0; i < 3; i++) {
+                const cupWrapper = document.createElement('div');
+                cupWrapper.className = 'cup-wrapper';
+                
+                const cup = document.createElement('div');
+                cup.className = 'cup';
+                cup.dataset.index = i;
+                cup.dataset.isMax = i === maxWaterIndex;
+                
+                // Cuerpo del vaso
+                const cupBody = document.createElement('div');
+                cupBody.className = 'cup-body';
+                
+                // Agua dentro del vaso
+                const water = document.createElement('div');
+                water.className = 'water';
+                water.style.height = `${waterLevels[i]}%`;
+                
+                // Superficie del agua
+                const waterSurface = document.createElement('div');
+                waterSurface.className = 'water-surface';
+                
+                // Base del vaso
+                const cupBase = document.createElement('div');
+                cupBase.className = 'cup-base';
+                
+                // Número del vaso
+                const cupNumber = document.createElement('div');
+                cupNumber.className = 'cup-number';
+                cupNumber.textContent = `Vaso ${i+1}`;
+                
+                // Ensamblar el vaso
+                water.appendChild(waterSurface);
+                cupBody.appendChild(water);
+                cup.appendChild(cupBody);
+                cup.appendChild(cupBase);
+                
+                cupWrapper.appendChild(cup);
+                cupWrapper.appendChild(cupNumber);
+                
+                cup.addEventListener('click', handleCupClick);
+                
+                cupsContainer.appendChild(cupWrapper);
+            }
+        }
+
+        // Manejar el clic en un vaso
+        function handleCupClick(event) {
+            if (!gameActive) return;
+            
+            const cup = event.currentTarget;
+            const isMax = cup.dataset.isMax === 'true';
+            
+            // Deshabilitar clics en vasos
+            gameActive = false;
+            
+            if (isMax) {
+                // Respuesta correcta
+                score += 10;
+                messageElement.innerHTML = '<div class="icon-thumbs-up"></div> ¡Muy bien! +10 puntos <div class="icon-thumbs-up"></div>';
+                messageElement.className = 'message correct';
+                playSound(523, 0.5, 'sine'); // Sonido de acierto
+                
+                // Efecto visual para acierto
+                cup.style.filter = 'drop-shadow(0 0 20px rgba(128, 203, 196, 0.9))';
+            } else {
+                // Respuesta incorrecta
+                score = Math.max(0, score - 5);
+                messageElement.textContent = 'Ups, ese no era. -5 puntos. ¡Sigue intentando!';
+                messageElement.className = 'message incorrect';
+                playSound(220, 0.3, 'sawtooth'); // Sonido de error
+                
+                // Efecto visual para error
+                cup.style.filter = 'drop-shadow(0 0 20px rgba(239, 154, 154, 0.9))';
+                
+                // Resaltar el vaso correcto
+                const cups = document.querySelectorAll('.cup');
+                cups.forEach(c => {
+                    if (c.dataset.isMax === 'true') {
+                        c.style.filter = 'drop-shadow(0 0 20px rgba(128, 203, 196, 0.9))';
+                    }
+                });
+            }
+            
+            // Actualizar puntuación
+            scoreElement.textContent = score;
+            
+            // Mostrar botón para siguiente ronda o finalizar juego
+            if (currentRound < 4) {
+                nextRoundButton.style.display = 'inline-block';
+            } else {
+                setTimeout(endGame, 1500);
+            }
+        }
+
+        // Avanzar a la siguiente ronda
+        function nextRound() {
+            currentRound++;
+            roundCountElement.textContent = currentRound;
+            messageElement.textContent = '';
+            messageElement.className = 'message';
+            nextRoundButton.style.display = 'none';
+            gameActive = true;
+            
+            generateCups();
+        }
+
+        // Mostrar estrellas según la puntuación
+        function showStars(score) {
+            const starsContainer = document.createElement('div');
+            starsContainer.className = 'stars';
+            
+            const starCount = Math.min(5, Math.floor(score / 8));
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                starsContainer.appendChild(star);
+            }
+            
+            return starsContainer;
+        }
+
+        // Finalizar el juego
+        function endGame() {
+            messageElement.innerHTML = '';
+            messageElement.className = 'game-over';
+            
+            const gameOverText = document.createElement('div');
+            gameOverText.textContent = '¡Juego Terminado!';
+            messageElement.appendChild(gameOverText);
+            
+            // Mostrar puntuación final
+            const finalScore = document.createElement('div');
+            finalScore.className = 'final-score';
+            finalScore.textContent = `Puntuación final: ${score}`;
+            messageElement.appendChild(finalScore);
+            
+            // Mostrar estrellas
+            const stars = showStars(score);
+            messageElement.appendChild(stars);
+            
+            // Mensaje según la puntuación
+            const message = document.createElement('div');
+            message.style.marginTop = '15px';
+            message.style.fontSize = '1.5rem';
+            
+            if (score >= 30) {
+                const trophy = document.createElement('div');
+                trophy.className = 'trophy';
+                message.appendChild(trophy);
+                message.innerHTML += '¡Eres un experto!';
+                message.style.color = '#FFB74D';
+            } else if (score >= 20) {
+                message.innerHTML = '¡Muy bien hecho!';
+                message.style.color = '#80CBC4';
+            } else {
+                message.innerHTML = '¡Sigue practicando!';
+                message.style.color = '#64B5F6';
+            }
+            
+            messageElement.appendChild(message);
+            
+            // Botón para reiniciar
+            const restartButton = document.createElement('button');
+            restartButton.textContent = 'Jugar de nuevo';
+            restartButton.addEventListener('click', initGame);
+            messageElement.appendChild(restartButton);
+        }
+
+        // Event listeners
+        nextRoundButton.addEventListener('click', nextRound);
+
+        // Iniciar el juego
+        initGame();
+    </script>
+</body>
+</html>
